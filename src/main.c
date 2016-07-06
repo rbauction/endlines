@@ -289,10 +289,12 @@ move_temp_file_to_destination(char* filename, struct stat *statinfo) {
     if(err) {
         fprintf(stderr, "endlines : could not restore permissions for %s\n", filename);
     }
+#ifndef _WIN32
     err = chown(filename, statinfo->st_uid, statinfo->st_gid);
     if(err) {
         fprintf(stderr, "endlines : could not restore ownership for %s\n", filename);
     }
+#endif
 
     return CAN_CONTINUE;
 }

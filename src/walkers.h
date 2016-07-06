@@ -55,6 +55,12 @@
 // - verbose : self explanatory.
 //
 
+#ifdef _WIN32
+#define SLASH '\\'
+#else
+#define SLASH '/'
+#endif
+
 typedef struct {
     // options
     void (*process_file)(char*, struct stat*, void*);

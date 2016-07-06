@@ -20,6 +20,7 @@
 #include "walkers.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 #include <dirent.h>
 
@@ -85,7 +86,7 @@ typedef enum {
 static inline trivalent
 could_be_a_hidden_filename_with_a_path_prefix(char *filename, int len) {
     for(int i=len-2; i>=0; --i) {
-        if(filename[i]=='/') {
+        if(filename[i]==SLASH) {
             if(filename[i+1]=='.') {
                 return YES;
             } else {
@@ -96,10 +97,19 @@ could_be_a_hidden_filename_with_a_path_prefix(char *filename, int len) {
     return NOT_APPLICABLE;
 }
 
+static char* concat(char *s1, int s2)
+{
+    char *result = malloc(strlen(s1)+2);//1 char + 1 for the zero-terminator
+    //in real code you would check for errors in malloc here
+    strcpy(result, s1);
+    result[strlen(s1)] = s2;
+    return result;
+}
+
 static inline bool
 is_a_hidden_file_name_without_a_path_prefix(char *filename, int len) {
    return (filename[0]=='.' && strcmp(filename, ".") && strcmp(filename, "..") &&
-                               strcmp(filename, "./") && strcmp(filename, "../"));
+                               strcmp(filename, concat(".", SLASH)) && strcmp(filename, concat("..", SLASH)));
 }
 
 static bool
@@ -148,8 +158,8 @@ append_filename_to_base_path(char* base_path, int base_path_length, char* filena
         return 1;
     }
 
-    if( base_path[base_path_length - 1] != '/') {
-        base_path[base_path_length] = '/';
+    if( base_path[base_path_length - 1] != SLASH) {
+        base_path[base_path_length] = SLASH;
         strcpy(&(base_path[base_path_length+1]), filename);
     } else {
         strcpy(&(base_path[base_path_length]), filename);
