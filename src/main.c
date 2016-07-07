@@ -20,6 +20,7 @@
 #include "walkers.h"
 #include "known_binary_extensions.h"
 
+#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <utime.h>
@@ -183,7 +184,24 @@ display_version_and_quit() {
     exit(1);
 }
 
+#ifdef _WIN32
+char *
+convert_slashes(char *path) {
+    char *slash;
+    char *winpath = malloc(strlen(path) + 1);
+    strcpy(winpath, path);
 
+    slash = winpath;
+    while (slash[0] != '\0') {
+        slash = strchr(slash, '/');
+        if (slash == NULL)
+            break;
+        slash[0] = SLASH;
+    }
+
+    return winpath;
+}
+#endif
 
 
 
@@ -203,7 +221,11 @@ parse_cmd_line_args(int argc, char** argv) {
 
     for(int i=1; i<argc; ++i) {
         if(i>1 && argv[i][0] != '-') {
+#ifdef _WIN32
+            cmd_line_args.filenames[cmd_line_args.file_count] = convert_slashes(argv[i]);
+#else
             cmd_line_args.filenames[cmd_line_args.file_count] = argv[i];
+#endif
             ++ cmd_line_args.file_count;
         } else if(!strcmp(argv[i], "--help")) {
             display_help_and_quit();
